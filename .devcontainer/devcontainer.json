@@ -1,0 +1,47 @@
+{
+  "name": "Dental Project",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "USER_NAME": "${localEnv:USER}",
+      "USER_UID": "1000",
+      "USER_GID": "1000"
+    }
+  },
+
+  "containerEnv": {
+    "PYTHONPATH": "${containerWorkspaceFolder}"
+  },
+
+  "remoteUser": "${localEnv:USER}",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "python.defaultInterpreterPath": "/home/${localEnv:USER}/venv/bin/python",
+        "python.testing.unittestEnabled": false,
+        "python.testing.pytestEnabled": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+          "source.fixAll.ruff": "explicit",
+          "source.organizeImports.ruff": "explicit"
+        }
+      },
+      "extensions": [
+        "GitHub.copilot-chat",
+        "eamodio.gitlens",
+        "shd101wyy.markdown-preview-enhanced",
+        "ms-python.python",
+        "ZainChen.json",
+        "tamasfe.even-better-toml",
+        "GitHub.vscode-pull-request-github",
+        "charliermarsh.ruff"
+      ]
+    }
+  },
+
+  "onCreateCommand": "uv sync --all-groups --all-packages && chmod +x .devcontainer/run_on_start.sh",
+
+  "postStartCommand": "/bin/sh -c '.devcontainer/run_on_start.sh'"
+}
