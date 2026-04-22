@@ -36,7 +36,8 @@
         "ZainChen.json",
         "tamasfe.even-better-toml",
         "GitHub.vscode-pull-request-github",
-        "charliermarsh.ruff"
+        "charliermarsh.ruff",
+        "GitHub.vscode-github-actions"
       ]
     }
   },

@@ -1,41 +1,35 @@
-# 1. fázis: Építés
+# Phase 1: Builder
 FROM python:3.14-slim AS builder
 
-# uv telepítése
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
+# Use ARG to make the package name dynamic for the monorepo
+ARG PACKAGE_NAME=template_app
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 
 WORKDIR /app
+ENV UV_COMPILE_BYTECODE=1
 
-# 1. Csak a konfigurációs fájlok másolása
+# Copy root config and the specific app config
 COPY pyproject.toml uv.lock ./
-COPY apps/template_app/pyproject.toml ./apps/template_app/
+COPY apps/${PACKAGE_NAME}/pyproject.toml ./apps/${PACKAGE_NAME}/
 
-# 2. TRÜKK: Létrehozzuk az üres forráskódot ÉS a metaadat fájlokat
-RUN mkdir -p apps/template_app/src/template_app && \
-    touch apps/template_app/src/template_app/__init__.py && \
-    touch apps/template_app/README.md && \
-    touch README.md
+# Install only the dependencies for the specific package
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-install-workspace --no-dev --package ${PACKAGE_NAME}
 
-# 3. Függőségek letöltése és cache-elése
-RUN uv sync --frozen --no-install-project --no-dev
-
-# 4. Most másoljuk át a valódi forráskódot
 COPY . .
 
-# 5. Teljes szinkronizálás (most már a valódi kódot is installálja)
-RUN uv sync --frozen --no-dev
+# Final sync for the specific package
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev --package ${PACKAGE_NAME}
 
-# 2. fázis: Futtatás
+# Phase 2: Runtime
 FROM python:3.14-slim
-
 WORKDIR /app
-
-# Átmásoljuk a builderben felépített környezetet és kódot
 COPY --from=builder /app /app
-
 ENV PATH="/app/.venv/bin:$PATH"
 ENV PORT=10000
 EXPOSE 10000
 
-# Streamlit indítása
+# Use a shell script or direct command - ensuring it points to the right package
 CMD ["streamlit", "run", "apps/template_app/src/template_app/main.py", "--server.port=10000", "--server.address=0.0.0.0"]
