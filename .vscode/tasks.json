@@ -1,0 +1,17 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+            {
+                "label": "Build and Run: Sphinx documentation",
+                "type": "shell",
+                "command": "uv run sphinx-build -b html docs/source docs/build && cd docs/build && uv run python -m http.server 8000",
+            },
+            {
+                "label": "Run: Pre-commit hooks",
+                "type": "shell",
+                "command": "uv run pre-commit run --all-files",
+            }
+    ]
+}

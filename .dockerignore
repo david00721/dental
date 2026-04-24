@@ -1,0 +1,6 @@
+.venv/
+.git/
+__pycache__/
+docs/build/
+.ruff_cache/
+.mypy_cache/
